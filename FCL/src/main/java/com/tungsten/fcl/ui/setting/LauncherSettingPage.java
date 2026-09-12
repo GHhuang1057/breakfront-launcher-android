@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.mio.ui.adapter.SpacingItemDecoration;
 import com.tungsten.fcl.R;
 import com.tungsten.fcl.activity.MainActivity;
+import com.tungsten.fcl.activity.WebActivity;
 import com.tungsten.fcl.databinding.PageSettingListBinding;
 import com.tungsten.fcl.setting.DownloadProviders;
 import com.tungsten.fcl.upgrade.UpdateChecker;
@@ -116,6 +117,9 @@ public class LauncherSettingPage extends FCLPage implements LauncherSettingAdapt
                 break;
             case EXPORT_LOG:
                 exportLog();
+                break;
+            case GEEKHONIZE_LOGIN:
+                startActivity(new Intent(getContext(), WebActivity.class).putExtra("url", getContext().getString(R.string.geekhonize_auth_url)));
                 break;
             case CLEAR_MOD_CACHE:
                 Task.runAsync(RemoteModCache::clear).whenComplete(Schedulers.androidUIThread(), e -> {
