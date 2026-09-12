@@ -57,6 +57,7 @@ enum class LauncherSettingTag {
     CURSOR_SET,
     MENU_ICON_RESET,
     MENU_ICON_SET,
+    GEEKHONIZE_LOGIN,
 
     // 开关行
     SWITCH_AUTO_EXIT,
@@ -152,6 +153,11 @@ class LauncherSettingAdapter(
                 R.string.settings_launcher_upgrade,
                 listOf(Triple(0, R.string.settings_launcher_upgrade_check, LauncherSettingTag.CHECK_UPDATE)),
                 R.string.settings_launcher_upgrade_desc,
+            ),
+            Row.ButtonRow(
+                R.string.geekhonize_login,
+                listOf(Triple(0, R.string.geekhonize_login, LauncherSettingTag.GEEKHONIZE_LOGIN)),
+                R.string.geekhonize_login_desc,
             ),
             Row.ButtonRow(
                 R.string.settings_launcher_debug,
