@@ -514,6 +514,9 @@ public class FCLauncher {
      */
     private static void installBreakfrontMods(Context context, String workingDir) {
         if (context == null || workingDir == null) return;
+
+        installBreakfrontServerEntry(context, workingDir);
+
         File modsDir = new File(workingDir, "mods");
         if (!modsDir.isDirectory() && !modsDir.mkdirs()) return;
         try {
@@ -534,6 +537,27 @@ public class FCLauncher {
             }
         } catch (IOException e) {
             Logging.LOG.log(Level.WARNING, "Failed to install Breakfront client mod: " + e);
+        }
+    }
+
+    /**
+     * Seeds a preset BREAKFRONT server entry (servers.dat) into the game profile on first
+     * launch, so the multiplayer list already contains play.geekhonize.top. Only written
+     * when absent - never clobbers the player's own server list.
+     */
+    private static void installBreakfrontServerEntry(Context context, String workingDir) {
+        if (context == null || workingDir == null) return;
+        File dest = new File(workingDir, "servers.dat");
+        if (dest.exists()) return;
+        try (InputStream in = context.getAssets().open("breakfront/servers.dat");
+             OutputStream out = new FileOutputStream(dest)) {
+            byte[] buf = new byte[8192];
+            int n;
+            while ((n = in.read(buf)) > 0) {
+                out.write(buf, 0, n);
+            }
+        } catch (IOException e) {
+            Logging.LOG.log(Level.WARNING, "Failed to seed Breakfront server entry: " + e);
         }
     }
 
