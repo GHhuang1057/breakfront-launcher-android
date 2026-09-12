@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name" translatable="false">BREAKFRONT</string>
     <string name="geekhonize_auth_url" translatable="false">https://auth.geekhonize.top</string>
+    <string name="geekhonize_login" translatable="false">登录 Geekhonize</string>
+    <string name="geekhonize_login_desc" translatable="false">使用 Geekhonize 账号登录；进入游戏后由客户端自动接管令牌。</string>
     <string name="app_name_import">Install Modpack</string>
 
     <string name="splash_agreement">FCL requires storage permission to manage and read game files. FCL is fully open-source on GitHub, so please rest assured about your data security. The permission is solely for the game to operate properly and poses no security risks.</string>
