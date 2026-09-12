@@ -88,26 +88,21 @@ public class MainUI extends FCLCommonUI implements View.OnClickListener {
         });
         checkAnnouncement();
 
-        // BREAKFRONT: 首次启动（未登录且未跳过）时引导网页授权登录
+                // BREAKFRONT: 首次启动（未登录且未跳过）时引导网页授权登录
         android.content.SharedPreferences geoPref =
                 getContext().getSharedPreferences("breakfront_geo", Context.MODE_PRIVATE);
         if (!com.tungsten.fcl.geo.BreakfrontGeoAuth.signedIn(getContext())
                 && !geoPref.getBoolean("geo_prompt_dismissed", false)) {
-            getContentView().post(new Runnable() {
-                @Override
-                public void run() {
-                    FCLAlertDialog.Builder builder = new FCLAlertDialog.Builder(getContext());
-                    builder.setAlertLevel(FCLAlertDialog.AlertLevel.ALERT);
-                    builder.setCancelable(false);
-                    builder.setMessage("Geekhonize 账号尚未登录。
-
-"
-                            + "登录后进入服务器会自动完成身份绑定，无需手动输入。");
-                    builder.setPositiveButton(() ->
-                            com.tungsten.fcl.geo.BreakfrontGeoAuth.startLogin(getContext()));
-                    builder.setNegativeButton(() ->
-                            geoPref.edit().putBoolean("geo_prompt_dismissed", true).apply());
-                    builder.create().show();
+            getContentView().post(() -> {
+                FCLAlertDialog.Builder builder = new FCLAlertDialog.Builder(getContext());
+                builder.setAlertLevel(FCLAlertDialog.AlertLevel.ALERT);
+                builder.setCancelable(false);
+                builder.setMessage("Geekhonize 账号尚未登录。登录后进入服务器会自动完成身份绑定，无需手动输入。");
+                builder.setPositiveButton(() -> com.tungsten.fcl.geo.BreakfrontGeoAuth.startLogin(getContext()));
+                builder.setNegativeButton(() -> geoPref.edit().putBoolean("geo_prompt_dismissed", true).apply());
+                builder.create().show();
+            });
+        }
                 }
             });
         }
