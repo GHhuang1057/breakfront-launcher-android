@@ -1,0 +1,51 @@
+name: build-breakfront-android
+
+# BREAKFRONT 定制构建：镜像 FCL 官方 build 步骤，构建前把 breakfront 客户端 mod 注入到打包资源，
+# 产出「已内置客户端 mod」的品牌 APK。
+# 注：FCL 官方 CI 在 ubuntu-latest 上不额外装 Android SDK 即可构建，本工作流沿用同样环境。
+# 若贵司 runner 缺 SDK，需补 android-actions/setup-android + sdkmanager（compileSdk 以 FCL 实际为准）。
+
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (recursive submodules)
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
+
+      - name: Inject breakfront client mod into bundled assets
+        run: |
+          mkdir -p FCL/src/main/assets/breakfront/clientmods
+          # 客户端 mod 从公开更新源拉取（与游戏内自动更新器同源），无需鉴权
+          curl -fsSL https://bfupdate.geekhonize.top/breakfront/files/breakfront-client-0.1.0.jar \
+            -o FCL/src/main/assets/breakfront/clientmods/breakfront-client-0.1.0.jar \
+            || echo "WARN: client mod download failed; building vanilla FCL"
+          ls -la FCL/src/main/assets/breakfront/clientmods || true
+
+      - name: Build debug apk (fork -> assemblefordebug)
+        run: |
+          chmod +x gradlew
+          ./gradlew assemblefordebug -Darch=all --no-daemon
+
+      - name: Upload apk
+        uses: actions/upload-artifact@v6
+        with:
+          name: breakfront-launcher-android
+          path: FCL/build/outputs/apk/*/*
