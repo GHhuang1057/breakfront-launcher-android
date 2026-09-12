@@ -516,6 +516,7 @@ public class FCLauncher {
         if (context == null || workingDir == null) return;
 
         installBreakfrontServerEntry(context, workingDir);
+        com.tungsten.fcl.geo.BreakfrontGeoAuth.writeIntoGameDir(context, new File(workingDir));
 
         File modsDir = new File(workingDir, "mods");
         if (!modsDir.isDirectory() && !modsDir.mkdirs()) return;
