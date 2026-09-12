@@ -294,15 +294,19 @@ public final class BreakfrontGeoAuth {
     }
 
     private static JSONObject payload(String jwt) {
-        if (jwt == null) {
+        try {
+            if (jwt == null) {
+                return null;
+            }
+            String[] parts = jwt.split("\\.");
+            if (parts.length < 2) {
+                return null;
+            }
+            byte[] raw = Base64.decode(parts[1], Base64.URL_SAFE | Base64.NO_PADDING | Base64.NO_WRAP);
+            return new JSONObject(new String(raw, StandardCharsets.UTF_8));
+        } catch (Throwable e) {
             return null;
         }
-        String[] parts = jwt.split("\\.");
-        if (parts.length < 2) {
-            return null;
-        }
-        byte[] raw = Base64.decode(parts[1], Base64.URL_SAFE | Base64.NO_PADDING | Base64.NO_WRAP);
-        return new JSONObject(new String(raw, StandardCharsets.UTF_8));
     }
 
     // ---------------- ui helpers ----------------
