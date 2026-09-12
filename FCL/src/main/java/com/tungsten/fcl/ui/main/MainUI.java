@@ -103,18 +103,10 @@ public class MainUI extends FCLCommonUI implements View.OnClickListener {
 
 "
                             + "登录后进入服务器会自动完成身份绑定，无需手动输入。");
-                    builder.setPositiveButton(new Runnable() {
-                        @Override
-                        public void run() {
-                            com.tungsten.fcl.geo.BreakfrontGeoAuth.startLogin(getContext());
-                        }
-                    });
-                    builder.setNegativeButton(new Runnable() {
-                        @Override
-                        public void run() {
-                            geoPref.edit().putBoolean("geo_prompt_dismissed", true).apply();
-                        }
-                    });
+                    builder.setPositiveButton(() ->
+                            com.tungsten.fcl.geo.BreakfrontGeoAuth.startLogin(getContext()));
+                    builder.setNegativeButton(() ->
+                            geoPref.edit().putBoolean("geo_prompt_dismissed", true).apply());
                     builder.create().show();
                 }
             });
