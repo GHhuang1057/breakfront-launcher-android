@@ -1,7 +1,7 @@
 name: build-breakfront-android
 
 # BREAKFRONT 定制构建：镜像 FCL 官方 build 步骤，构建前把完整的 BREAKFRONT 客户端模组
-# 与预置服务器写进 APK 资源，产出「开箱即玩」的品牌 APK。
+# 与预置服务器写进 APK 资源，产出「开箱即玩」的品牌 APK，并发布到 Releases。
 # 注：FCL 官方 CI 在 ubuntu-latest 上不额外装 Android SDK 即可构建，本工作流沿用同样环境。
 
 on:
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -32,7 +32,12 @@ jobs:
       - name: Stage BREAKFRONT assets (client mods + preset server)
         run: |
           set -e
-          python3 pack/build_android_assets.py             --mods-dir FCL/src/main/assets/breakfront/clientmods             --server-dat FCL/src/main/assets/breakfront/servers.dat             || (echo "retry after transient failure..."; sleep 15; python3 pack/build_android_assets.py                  --mods-dir FCL/src/main/assets/breakfront/clientmods                  --server-dat FCL/src/main/assets/breakfront/servers.dat)
+          python3 pack/build_android_assets.py \
+            --mods-dir FCL/src/main/assets/breakfront/clientmods \
+            --server-dat FCL/src/main/assets/breakfront/servers.dat \
+            || (echo "retry after transient failure..."; sleep 15; python3 pack/build_android_assets.py \
+                 --mods-dir FCL/src/main/assets/breakfront/clientmods \
+                 --server-dat FCL/src/main/assets/breakfront/servers.dat)
           ls FCL/src/main/assets/breakfront
           ls FCL/src/main/assets/breakfront/clientmods | head -40
 
@@ -41,8 +46,34 @@ jobs:
           chmod +x gradlew
           ./gradlew assemblefordebug -Darch=all --no-daemon
 
-      - name: Upload apk
+      - name: Get short SHA
+        run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> "$GITHUB_ENV"
+
+      - name: Collect branded APKs
+        run: |
+          set -e
+          mkdir -p out
+          find FCL/build/outputs/apk -name '*.apk' | while read f; do
+            base=$(basename "$f")
+            arch=$(echo "$base" | sed -E 's/^app-//; s/\.apk$//')
+            cp "$f" "out/BREAKFRONT-Android-${SHORT_SHA}-${arch}.apk"
+          done
+          ls -la out
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v6
         with:
-          name: breakfront-launcher-android
-          path: FCL/build/outputs/apk/*/*
+          name: breakfront-launcher-android-${{ env.SHORT_SHA }}
+          path: out/*
+          archive: false
+
+      - name: Publish prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          TAG="launcher-android-dev-${SHORT_SHA}"
+          gh release delete "${TAG}" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "${TAG}" out/* --prerelease \
+            --title "BREAKFRONT Android Launcher (FCL fork) dev ${SHORT_SHA}" \
+            --notes "推荐下载 -all.apk（全架构通用包）。已内置完整客户端模组与预置服务器 play.geekhonize.top，首次启动自动安装；「登录 Geekhonize」在设置页与首页引导。"
