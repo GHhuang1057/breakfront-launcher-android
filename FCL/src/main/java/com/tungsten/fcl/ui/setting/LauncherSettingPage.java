@@ -119,7 +119,7 @@ public class LauncherSettingPage extends FCLPage implements LauncherSettingAdapt
                 exportLog();
                 break;
             case GEEKHONIZE_LOGIN:
-                startActivity(new Intent(getContext(), WebActivity.class).putExtra("url", getContext().getString(R.string.geekhonize_auth_url)));
+                getContext().startActivity(new Intent(getContext(), WebActivity.class).putExtra("url", getContext().getString(R.string.geekhonize_auth_url)));
                 break;
             case CLEAR_MOD_CACHE:
                 Task.runAsync(RemoteModCache::clear).whenComplete(Schedulers.androidUIThread(), e -> {
