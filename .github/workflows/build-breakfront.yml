@@ -1,9 +1,8 @@
 name: build-breakfront-android
 
-# BREAKFRONT 定制构建：镜像 FCL 官方 build 步骤，构建前把 breakfront 客户端 mod 注入到打包资源，
-# 产出「已内置客户端 mod」的品牌 APK。
+# BREAKFRONT 定制构建：镜像 FCL 官方 build 步骤，构建前把完整的 BREAKFRONT 客户端模组
+# 与预置服务器写进 APK 资源，产出「开箱即玩」的品牌 APK。
 # 注：FCL 官方 CI 在 ubuntu-latest 上不额外装 Android SDK 即可构建，本工作流沿用同样环境。
-# 若贵司 runner 缺 SDK，需补 android-actions/setup-android + sdkmanager（compileSdk 以 FCL 实际为准）。
 
 on:
   push:
@@ -30,14 +29,12 @@ jobs:
           java-version: 17
           cache: gradle
 
-      - name: Inject breakfront client mod into bundled assets
+      - name: Stage BREAKFRONT assets (client mods + preset server)
         run: |
-          mkdir -p FCL/src/main/assets/breakfront/clientmods
-          # 客户端 mod 从公开更新源拉取（与游戏内自动更新器同源），无需鉴权
-          curl -fsSL https://bfupdate.geekhonize.top/breakfront/files/breakfront-client-0.1.0.jar \
-            -o FCL/src/main/assets/breakfront/clientmods/breakfront-client-0.1.0.jar \
-            || echo "WARN: client mod download failed; building vanilla FCL"
-          ls -la FCL/src/main/assets/breakfront/clientmods || true
+          set -e
+          python3 pack/build_android_assets.py             --mods-dir FCL/src/main/assets/breakfront/clientmods             --server-dat FCL/src/main/assets/breakfront/servers.dat             || (echo "retry after transient failure..."; sleep 15; python3 pack/build_android_assets.py                  --mods-dir FCL/src/main/assets/breakfront/clientmods                  --server-dat FCL/src/main/assets/breakfront/servers.dat)
+          ls FCL/src/main/assets/breakfront
+          ls FCL/src/main/assets/breakfront/clientmods | head -40
 
       - name: Build debug apk (fork -> assemblefordebug)
         run: |
