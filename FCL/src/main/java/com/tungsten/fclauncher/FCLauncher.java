@@ -28,6 +28,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -504,6 +507,36 @@ public class FCLauncher {
         return launchProcess(config, "latest_api_installer.log", "API Installer", false, false, false);
     }
 
+    /**
+     * Copies the Breakfront client mod bundled in app assets into the game
+     * profile's mods/ folder on first launch. The client mod's own auto-updater
+     * (breakfront-client) takes over afterward, so we only seed when missing.
+     */
+    private static void installBreakfrontMods(Context context, String workingDir) {
+        if (context == null || workingDir == null) return;
+        File modsDir = new File(workingDir, "mods");
+        if (!modsDir.isDirectory() && !modsDir.mkdirs()) return;
+        try {
+            String[] names = context.getAssets().list("breakfront/clientmods");
+            if (names == null) return;
+            for (String name : names) {
+                if (!name.endsWith(".jar")) continue;
+                File dest = new File(modsDir, name);
+                if (dest.exists()) continue; // never overwrite; auto-updater owns updates
+                try (InputStream in = context.getAssets().open("breakfront/clientmods/" + name);
+                     OutputStream out = new FileOutputStream(dest)) {
+                    byte[] buf = new byte[8192];
+                    int n;
+                    while ((n = in.read(buf)) > 0) {
+                        out.write(buf, 0, n);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            Logging.LOG.log(Level.WARNING, "Failed to install Breakfront client mod: " + e);
+        }
+    }
+
     private static FCLBridge launchProcess(FCLConfig config, String logName, String task, boolean render, boolean logModList, boolean highPriority) {
 
         // initialize FCLBridge
@@ -530,6 +563,9 @@ public class FCLauncher {
                 // set working directory
                 log(bridge, "Working directory: " + config.getWorkingDir());
                 bridge.chdir(config.getWorkingDir());
+
+                // install bundled Breakfront client mod into profile mods/ (first launch only)
+                installBreakfrontMods(config.getContext(), config.getWorkingDir());
 
                 // launch
                 launch(config, bridge, task);
