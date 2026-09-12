@@ -22,6 +22,9 @@ public class UpdateChecker {
     public static final String UPDATE_CHECK_URL = "https://raw.githubusercontent.com/FCL-Team/FoldCraftLauncher/main/version_map.json";
     public static final String UPDATE_CHECK_URL_CN = "https://gitee.com/fcl-team/FCL-Repo/raw/main/res/version_map.json";
 
+    /// BREAKFRONT fork: disable upstream self-update entirely.
+    public static final boolean DISABLE_UPDATE_CHECK = true;
+
     private static UpdateChecker instance;
 
     public static UpdateChecker getInstance() {
@@ -51,6 +54,10 @@ public class UpdateChecker {
 
     public Task<?> check(Context context, boolean showBeta, boolean showAlert) {
         return Task.runAsync(() -> {
+            if (DISABLE_UPDATE_CHECK) {
+                // BREAKFRONT: customized fork — never fetch or apply upstream FCL updates.
+                return;
+            }
             isChecking = true;
             if (showAlert) {
                 Schedulers.androidUIThread().execute(() -> Toast.makeText(context, context.getString(R.string.update_checking), Toast.LENGTH_SHORT).show());
