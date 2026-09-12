@@ -119,7 +119,7 @@ public class LauncherSettingPage extends FCLPage implements LauncherSettingAdapt
                 exportLog();
                 break;
             case GEEKHONIZE_LOGIN:
-                getContext().startActivity(new Intent(getContext(), WebActivity.class).putExtra("url", getContext().getString(R.string.geekhonize_auth_url)));
+                com.tungsten.fcl.geo.BreakfrontGeoAuth.startLogin(getContext());
                 break;
             case CLEAR_MOD_CACHE:
                 Task.runAsync(RemoteModCache::clear).whenComplete(Schedulers.androidUIThread(), e -> {
