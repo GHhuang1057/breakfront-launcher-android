@@ -141,12 +141,10 @@ class AboutPage(context: Context?, id: Int) : FCLPage(context, id, R.layout.page
         private const val QQ_GROUP_KEY = "9_Mnxe5x1l6L7giLuRYQyBh0iWBgCUbw"
 
         private val LINKS = listOf(
-            LinkItem(R.string.about_launcher, "https://fcl-team.github.io/"),
-            LinkItem(R.string.about_developer, "https://github.com/FCL-Team"),
-            LinkItem(R.string.community_discord, "https://discord.gg/ffhvuXTwyV"),
-            LinkItem(R.string.community_qq, null),
-            LinkItem(R.string.about_sponsor, "https://afdian.com/@tungs"),
-            LinkItem(R.string.about_source, "https://github.com/FCL-Team/FoldCraftLauncher")
+            LinkItem(R.string.about_launcher, "https://mc.geekhonize.top"),
+            LinkItem(R.string.about_developer, "https://github.com/GHhuang1057"),
+            LinkItem(R.string.geekhonize_login, "https://auth.geekhonize.top"),
+            LinkItem(R.string.about_source, "https://github.com/GHhuang1057/breakfront-launcher-android")
         )
     }
 }
